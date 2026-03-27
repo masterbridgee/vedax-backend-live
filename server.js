@@ -1,40 +1,33 @@
 const express = require('express');
 const cors = require('cors');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-// 1. dotenv ని యాడ్ చేశాను - ఇది API Key ని చదవడానికి ముఖ్యం
-require('dotenv').config(); 
 
 const app = express();
 
-// 2. CORS setting: అందరినీ allow చేసేలా సింపుల్ గా ఉంచాను
+// 1. CORS setting: Manam live loki velthunnam kabatti, 
+// ippudu local port 3000 matrame kadu, 
+// andarini allow chese la setup chestunnam (leda specific Vercel URL ivvachu).
 app.use(cors()); 
+
 app.use(express.json());
 
-// 3. Gemini API Initialization
-// Render Environment Variables నుంచి GEMINI_API_KEY ని తీసుకుంటుంది
+// 2. Gemini API Initialization
+// Security Rule: API Key ni direct ga code lo pettakudadu. 
+// Deenini Render Environment Variables nunchi automatic ga teesukuntundi.
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-// Root route: సర్వర్ పని చేస్తుందో లేదో చెక్ చేయడానికి
-app.get('/', (req, res) => {
-    res.send("🚀 VEDAX AI Backend is Live and Running!");
-});
 
 app.post('/generate', async (req, res) => {
     console.log("Request received for prompt:", req.body.prompt);
     try {
         const { prompt } = req.body;
         
-        if (!prompt) {
-            return res.status(400).json({ output: "Prompt missing boss!" });
-        }
-        
-        // Stable model version: gemini-1.5-flash (చాలా స్పీడ్ గా ఉంటుంది)
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        // Stable model version
+        const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
         
         const result = await model.generateContent(`
             Nuvvu 'VEDAX AI Smart Creator' vi. 
             User ki helpful ga, professional ga Business, Marketing, mariyu Side Hustles (WarriorPlus, Amazon FBA) gurinchi tips ivvu.
-            Answer simple Telugu mariyu English kalipi (Telugu-English) ivvu.
+            Answer simple Telugu mariyu English kalipi (Hinglish) ivvu.
             User Question: ${prompt}`);
 
         const response = await result.response;
@@ -45,15 +38,15 @@ app.post('/generate', async (req, res) => {
         
     } catch (error) {
         console.error("Gemini API Error:", error);
-        // ఎర్రర్ వస్తే ఈ మెసేజ్ కనిపిస్తుంది
         res.status(500).json({ output: "Backend Error: API Key leda Network check chey boss!" });
     }
 });
 
-// 4. Port Setting (Crucial for Render)
+// 3. Port Setting (Crucial for Render)
+// Render 'process.env.PORT' dwara dynamic ga port ni assign chestundi (usually 10000).
 const PORT = process.env.PORT || 10000;
 
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, () => {
     console.log(`========================================`);
     console.log(`🚀 VEDAX AI Brain Port ${PORT} lo ready!`);
     console.log(`========================================`);
